@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Расчет нормы калорий - Планировщик Питания</title>
+  <!-- Подключите ваши общие стили, если есть, или добавьте стили здесь -->
+  <style>
+    body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; }
+    .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+    h1 { text-align: center; color: #333; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input[type="number"], .form-group select {
+      width: calc(100% - 22px); padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;
+    }
+    .btn { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    .btn:hover { background-color: #0056b3; }
+    .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+    .success-message { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .error-message { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .result-section { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Расчет дневной нормы калорий</h1>
+
+  <!-- Сообщения -->
+  <div th:if="${successMessage}" class="message success-message" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="message error-message" th:text="${errorMessage}"></div>
+
+  <!-- Результат расчета -->
+  <div th:if="${calculatedNorm}" class="result-section">
+    <h3>Результат:</h3>
+    <p>Ваша примерная дневная норма калорий: <strong th:text="${#numbers.formatDecimal(calculatedNorm, 1, 2)}">0.00</strong> ккал</p>
+    <!-- Если будете возвращать BMR из сервиса, можно его здесь отобразить:
+    <p>Ваш базовый метаболизм (BMR): <strong th:text="${#numbers.formatDecimal(calculatedBmr, 1, 2)}">0.00</strong> ккал</p>
+    -->
+  </div>
+
+  <form th:action="@{/user/calculate-norm}" method="post" th:object="${userPhysiologyDto}">
+    <div class="form-group">
+      <label for="weight">Вес (кг):</label>
+      <input type="number" id="weight" th:field="*{weight}" step="0.1" placeholder="Например, 70.5" required />
+    </div>
+    <div class="form-group">
+      <label for="height">Рост (см):</label>
+      <input type="number" id="height" th:field="*{height}" step="0.1" placeholder="Например, 175" required />
+    </div>
+    <div class="form-group">
+      <label for="age">Возраст (лет):</label>
+      <input type="number" id="age" th:field="*{age}" placeholder="Например, 30" required />
+    </div>
+    <div class="form-group">
+      <label for="activityLevel">Уровень активности:</label>
+      <select id="activityLevel" th:field="*{activityLevel}" required>
+        <option value="">-- Выберите уровень --</option>
+        <option th:each="level : ${activityLevels}"
+                th:value="${level.name()}"
+                th:text="${level.displayName}"
+                th:selected="${userPhysiologyDto.activityLevel == level.name()}">
+          Уровень
+        </option>
+      </select>
+    </div>
+    <button type="submit" class="btn">Рассчитать</button>
+  </form>
+  <hr style="margin-top: 20px;">
+  <a th:href="@{/catalog}" class="btn" style="background-color: #6c757d;">Вернуться в каталог</a>
+  <!-- Или ссылка на главную, если есть -->
+  <!-- <a th:href="@{/}" class="btn" style="background-color: #6c757d;">На главную</a> -->
+
+</div>
+</body>
+</html>
